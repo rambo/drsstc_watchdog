@@ -1,7 +1,7 @@
 /**
  * For ATTiny85
  *
- * 
+ * Remember: Boards with 57727H2 marking have silkscreen error where pins 1 & 2 are switched  
  */
 #include <PinChangeInterruptSimple.h>
 
