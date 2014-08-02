@@ -1,5 +1,7 @@
 /**
- * For ATTiny85
+ * For ATTiny85 @8Mhz
+ *
+ * Timer1 used for PWM enforcing, millis() does not work.
  *
  * Remember: Boards with 57727H2 marking have silkscreen error where pins 1 & 2 are switched  
  */
@@ -69,7 +71,7 @@ void setup()
 }
 
 
-// Timer example from http://forum.arduino.cc/index.php?topic=163393.0
+// Timer example from http://forum.arduino.cc/index.php?topic=163393.0 (note we do not have millis() anymore since timer1 is used for that on attiny)
 void initTimerCounter1(void)
 {
     cli();
