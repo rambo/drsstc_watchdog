@@ -23,6 +23,8 @@ volatile uint8_t timing_error;
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/wdt.h>
+
 
 void input_check()
 {
@@ -54,7 +56,8 @@ void input_low()
 
 void setup()
 {
-    // TODO: disable watchdog
+    wdt_disable();
+
     pinMode(OUTPUT_PIN, OUTPUT);
     pinMode(LED_PIN, OUTPUT);
     /**
@@ -68,6 +71,8 @@ void setup()
     // Setup the timer that forces output low if it's too long
     initTimerCounter1();
     // TODO: Setup watchdog (if we can go to usec resolution with it...)
+
+    wdt_enable(WDTO_15MS);
 }
 
 
@@ -95,23 +100,21 @@ ISR(TIMER1_COMPA_vect)
     }
 }
 
-/*
-// For adjusting timer
-volatile int matchDelay = 0;
-ISR(TIMER1_COMPB_vect)
-{
-  if(matchDelay <=4) {TCNT1 = 0; matchDelay++;}
-  else matchDelay = 0;
-}
-*/
-
 void loop()
 {
     if (timing_error)
     {
-        // TODO: Hang and let watchdog reset us ??
+        // Detach the input interrupt
+        detachPcInterrupt(INPUT_PIN);
+        // Foce output low
+        OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
+        // Turn LED on
         digitalWrite(LED_PIN, HIGH);
+        // Hang and let watchdog reset us in 2s
+        wdt_disable();
+        wdt_enable(WDTO_2S);
+        while (true);
     }
-    // TODO: keep clearing the watchdog
+    wdt_reset();
 }
 
