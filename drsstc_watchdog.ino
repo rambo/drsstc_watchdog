@@ -132,7 +132,7 @@ void loop()
     {
         // Detach the input interrupt
         detachPcInterrupt(INPUT_PIN);
-        // Foce output low
+        // Force output low
         OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
         // Turn LED on
         digitalWrite(LED_PIN, HIGH);
