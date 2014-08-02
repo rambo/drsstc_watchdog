@@ -10,10 +10,25 @@
 // On ATTiny85 the pin numbers correspond to bits on the only port
 #define OUTPUT_PORT PORTB
 #define OUTPUT_BIT 2
+#define INPUT_PORT PINB
+#define INPUT_BIT 1
 
 
 #define MAX_PULSE_LEN 200 // in uSec
 // TODO: limit the duty-cycle somehow
+
+
+void input_check()
+{
+    if (INPUT_PORT & _BV(INPUT_BIT))
+    {
+        OUTPUT_PORT |= _BV(OUTPUT_BIT);
+    }
+    else
+    {
+        OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
+    }
+}
 
 
 void input_high()
@@ -31,8 +46,12 @@ void setup()
 {
     // TODO: disable watchdog
     pinMode(OUTPUT_PIN, OUTPUT);
+    /*
     attachPcInterrupt(INPUT_PIN, input_high, RISING);
     attachPcInterrupt(INPUT_PIN, input_low, FALLING);
+    */
+    attachPcInterrupt(INPUT_PIN, input_check, RISING);
+    attachPcInterrupt(INPUT_PIN, input_check, FALLING);
     // TODO: Setup watchdog (if we can go to usec resolution with it...)
 }
 
