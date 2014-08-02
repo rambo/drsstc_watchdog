@@ -4,10 +4,6 @@ Attiny based simple proxy to make sure my (to be done) MIDI modulator does not k
 
 ## Working
 
-Enfore pulse width (up to 254 uSec, but the max for my coil is 200 anyway...)
-
-
-## TBD
-
-Enforce max duty-cycle
+  - Enfore pulse width (up to 254 uSec, but the max for my coil is 200 anyway...)
+  - Enforce duty-cycle
 
