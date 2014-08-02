@@ -16,15 +16,16 @@
 #define INPUT_PORT PINB
 #define INPUT_BIT 1
 
-#define MAX_PULSE_LEN 100 // in uSec, note we have only 8 bit timer *and* the pulses may *not* be longer than 200uSec anyway
-// TODO: limit the duty-cycle somehow
+#define MAX_PULSE_LEN 200 // in uSec, note we have only 8 bit timer *and* the pulses may *not* be longer than 200uSec anyway
+#define MAX_100HZ_ON_TIME 500 // in uSec, this, basically duty-cycle percentage times 100, do not exceed 5%
 
+volatile unsigned int pulse_on_time;
 volatile uint8_t timing_error;
+volatile boolean check_duty_cycle;
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/wdt.h>
-
 
 void input_check()
 {
@@ -39,6 +40,7 @@ void input_check()
     {
         OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
         TCCR1 = 0;                  //stop the timer
+        pulse_on_time += TCNT1;
     }
 }
 
@@ -70,7 +72,8 @@ void setup()
     
     // Setup the timer that forces output low if it's too long
     initTimerCounter1();
-    // TODO: Setup watchdog (if we can go to usec resolution with it...)
+    // Track duty-cycle
+    initTimerCounter0();
 
     wdt_enable(WDTO_15MS);
 }
@@ -92,13 +95,35 @@ void initTimerCounter1(void)
 
 ISR(TIMER1_COMPA_vect)
 {
-    // Port is still high, force low
+    // Port is still high, force low and raise problem flag
     if (OUTPUT_PORT & _BV(OUTPUT_BIT))
     {
         OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
         timing_error |= _BV(1);
     }
 }
+
+void initTimerCounter0(void)
+{
+    // Setup for 0.01s delay
+    cli();
+    TCCR0A = 0;                  //stop the timer
+    TCNT0 = 0;                  //zero the timer
+    GTCCR = _BV(PSR0);          //reset the prescaler
+    OCR0A = 78;      //set the compare value
+    TIMSK = _BV(OCIE0A);         //interrupt on Compare Match A
+    //start timer, ctc mode, prescaler clk/1023
+    TCCR0A = _BV(WGM01);
+    TCCR0B = _BV(CS02) | _BV(CS00);
+    sei();
+}
+
+ISR(TIMER0_COMPA_vect)
+{
+    check_duty_cycle = true;
+}
+
+
 
 void loop()
 {
@@ -114,6 +139,16 @@ void loop()
         wdt_disable();
         wdt_enable(WDTO_2S);
         while (true);
+    }
+    if (check_duty_cycle)
+    {
+        check_duty_cycle = false;
+        if (pulse_on_time > MAX_100HZ_ON_TIME)
+        {
+            OUTPUT_PORT &= 0xff ^ _BV(OUTPUT_BIT);
+            timing_error |= _BV(2);
+        }
+        pulse_on_time = 0;
     }
     wdt_reset();
 }
