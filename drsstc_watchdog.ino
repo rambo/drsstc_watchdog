@@ -1,9 +1,10 @@
 /**
- * For ATTiny85 @8Mhz
+ * For ATTiny85 @8Mhz (remember to "burn bootloader" first)
  *
- * Timer1 used for PWM enforcing, millis() does not work.
+ * Timer1 used for PWM enforcing, this means that millis() will not work (not that it matters to us, but if you loan code remember this)
+ * Timer0 used for duty-cycle enforcing
  *
- * Remember: Boards with 57727H2 marking have silkscreen error where pins 1 & 2 are switched  
+ * Remember: Boards with 57727H2 manufacturer marking have silkscreen error where pins 1 & 2 are switched  
  */
 #include <PinChangeInterruptSimple.h>
 
