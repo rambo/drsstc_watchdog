@@ -46,7 +46,8 @@ void setup()
 {
     // TODO: disable watchdog
     pinMode(OUTPUT_PIN, OUTPUT);
-    /*
+    /**
+     * For some reason both of these get called on both edges, go figure...
     attachPcInterrupt(INPUT_PIN, input_high, RISING);
     attachPcInterrupt(INPUT_PIN, input_low, FALLING);
     */
