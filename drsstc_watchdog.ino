@@ -111,6 +111,5 @@ void loop()
         digitalWrite(LED_PIN, HIGH);
     }
     // TODO: keep clearing the watchdog
-    // TODO: unless we can enforce max pulse_len with timer keep polling
 }
 
