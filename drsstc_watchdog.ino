@@ -122,6 +122,10 @@ void initTimerCounter0(void)
 ISR(TIMER0_COMPA_vect)
 {
     check_duty_cycle = true;
+    if (TCNT1)
+    {
+        pulse_on_time += TCNT1;
+    }
 }
 
 
